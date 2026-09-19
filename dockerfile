@@ -5,17 +5,18 @@ RUN apk add --no-cache openssl
 
 WORKDIR /app
 
-# Copiar archivos de dependencias primero para optimizar caché
+# Copiar dependencias
 COPY package*.json ./
 RUN npm install
 
-# Copiar el resto del código fuente (incluyendo la carpeta prisma y sus migraciones)
+# Copiar el código fuente
 COPY . .
 
-# Generar el cliente de Prisma
+# Generar el cliente de Prisma y compilar TypeScript (tsc)
 RUN npx prisma generate
+RUN npm run tsc
 
 EXPOSE 3000
 
-# Aplicar migraciones y arrancar la aplicación
-CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]
+# Aplicar migraciones y arrancar el servidor compilado en dist/index.js (o la ruta donde compile tu tsconfig)
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/index.js"]
